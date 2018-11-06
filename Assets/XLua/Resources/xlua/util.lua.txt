@@ -42,7 +42,12 @@ local move_end = {}
 local generator_mt = {
     __index = {
         MoveNext = function(self)
-            self.Current = self.co()
+			local errorflag = nil;             
+            errorflag,self.Current = coroutine.resume(self.co);
+			if errorflag==false then
+				error(self.Current,debug.traceback(self.Current)) 
+				self.Current = move_end;
+			end
             if self.Current == move_end then
                 self.Current = nil
                 return false
@@ -51,7 +56,7 @@ local generator_mt = {
             end
         end;
         Reset = function(self)
-            self.co = coroutine.wrap(self.w_func)
+            self.co = coroutine.create (self.w_func)
         end
     }
 }
